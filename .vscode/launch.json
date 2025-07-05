@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "chrome",
+        "request": "launch",
+        "name": "Launch Chrome against localhost",
+        "url": "http://localhost:8080/index.html",
+        "webRoot": "${workspaceFolder}",
+        "trace": true,
+        "runtimeArgs": [
+          "--disable-extensions",
+          "--remote-debugging-port=9222",
+          "--user-data-dir=${workspaceFolder}/.vscode/chrome-debug"
+        ]
+      }
+    ]
+  }
+  
