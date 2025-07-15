@@ -20,7 +20,7 @@ function findNearestIntersection(userLat, userLon, features, maxDist = 500) {
   let minDist = Infinity;
 
   for (const feature of features) {
-    const [lon, lat] = feature.geometry.coordinates;
+    const [lon, lat] = feature.geometry.coordinates[0]; // Adjust for MultiPoint structure
     const dist = haversineDistance(userLat, userLon, lat, lon);
 
     if (dist < minDist) {
@@ -36,7 +36,7 @@ function findNearestIntersection(userLat, userLon, features, maxDist = 500) {
   }
 }
 
-//Reverse geocoding function
+// Reverse geocoding function
 async function reverseGeocode(lat, lon) {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
   const response = await fetch(url);
@@ -44,66 +44,62 @@ async function reverseGeocode(lat, lon) {
   return data.display_name || "Unnamed Location";
 }
 
-// Load intersections.geojson and process location
-fetch("mississauga.geojson")
+// Load geoJSON file and process location
+fetch("toronto.geojson") // Use the correct path to your geoJSON file
   .then(res => res.json())
   .then(data => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userLat = position.coords.latitude;
-        const userLon = position.coords.longitude;
+    // Automatically find nearest intersection on page load
+    refreshLocation(data);
 
-        const result = findNearestIntersection(userLat, userLon, data.features);
-
-        const output = document.getElementById("output");
-        if (result) {
-          const { feature, distance } = result;
-          (async () => {
-            let intersectionName = feature.properties.name;
-          
-            if (!intersectionName) {
-              intersectionName = await reverseGeocode(
-                feature.geometry.coordinates[1],
-                feature.geometry.coordinates[0]
-              );
-            }
-          
-            output.innerHTML = `
-              🚦 Nearest Intersection: <strong>${intersectionName}</strong><br>
-              📏 Distance: ${distance.toFixed(2)} meters<br>
-              🧠 Note: ${feature.properties.note || "None"}
-            `;
-          })();
-          
-        } else {
-          output.innerHTML = `❌ No intersection found within 5 meters.`;
-        }
-      },
-      (error) => {
-        document.getElementById("output").textContent = "⚠️ Unable to get your location.";
-      }
-    );
+    // Button to refresh location
+    document.getElementById("refreshButton").addEventListener('click', function() {
+      refreshLocation(data);
+    });
   })
   .catch(err => {
     console.error("Failed to load GeoJSON:", err);
     document.getElementById("output").textContent = "⚠️ Failed to load map data.";
   });
 
-  //Button to refresh location
-  function refreshLocation() {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        document.getElementById("output").innerText = `Your location: ${lat}, ${lon}`;
-        // TODO: Call your intersection-matching logic here
-      },
-      (err) => {
-        document.getElementById("output").innerText = "Unable to get location.";
+// Function to handle location refresh and intersection matching
+function refreshLocation(data) {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const userLat = position.coords.latitude;
+      const userLon = position.coords.longitude;
+
+      // Call intersection-matching logic
+      const result = findNearestIntersection(userLat, userLon, data.features);
+
+      const output = document.getElementById("output");
+      if (result) {
+        const { feature, distance } = result;
+        (async () => {
+          let intersectionName = feature.properties.INTERSECTION_DESC; // Intersection description
+
+          if (!intersectionName) {
+            intersectionName = await reverseGeocode(
+              feature.geometry.coordinates[0][1], // Latitude
+              feature.geometry.coordinates[0][0]  // Longitude
+            );
+          }
+
+          // Update #location-name with the intersection name
+          document.getElementById("location-name").textContent = intersectionName;
+
+          // Update output with nearest intersection info
+          output.innerHTML = `
+            🚦 Nearest Intersection: <strong>${intersectionName}</strong><br>
+            📏 Distance: ${distance.toFixed(2)} meters<br>
+            🧠 Note: ${feature.properties.NOTE || "None"}
+          `;
+        })();
+      } else {
+        output.innerHTML = `❌ No intersection found within 500 meters.`;
       }
-    );
-  }
-  
-  // Automatically run on page load
-  refreshLocation();
-  
+    },
+    (error) => {
+      document.getElementById("output").textContent = "⚠️ Unable to get location.";
+    }
+  );
+}
