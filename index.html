@@ -5,17 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hamilton Bike Navigation</title>
 
-  <!-- ✅ Include the Google Font -->
+  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
 
-  <!-- ✅ Your CSS file -->
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Hamilton Bike Navigation</h1>
-  <div id="output">Locating...</div>
+  <header class="app-header">
+    <p class="location-title">You’ve Tapped in at</p>
+    <h1 id="location-name">XYZ Street and ABC Street</h1>
+  </header>
 
-  <button class="button" onclick="refreshLocation()">Refresh Location</button>
+  <section class="map-section">
+    <div id="map" class="map-placeholder">Loading map...</div>
+  </section>
+
+  <section class="explore-section">
+    <h2>Explore Destinations</h2>
+    <div class="tag-list">
+      <span class="tag">📍 Example Park | 3 km</span>
+      <span class="tag">📍 Example Museum | 5 km</span>
+      <span class="tag">📍 Example Café | 5 km</span>
+    </div>
+  </section>
+
+  <section class="explore-section">
+    <h2>Explore Biking Trails</h2>
+    <div class="tag-list">
+      <span class="tag">🛣️ Example Loop | 5 km</span>
+      <span class="tag">🛣️ Example Trail | 6 km</span>
+    </div>
+  </section>
 
   <script src="app.js"></script>
 </body>
