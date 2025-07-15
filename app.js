@@ -44,6 +44,7 @@ async function reverseGeocode(lat, lon) {
   return data.display_name || "Unnamed Location";
 }
 
+<<<<<<< HEAD
 // Initialize the map
 const INITIAL_MAP_CENTER = [43.6532, -79.3832]; // Toronto coordinates as an example
 const INITIAL_MAP_ZOOM = 13;
@@ -64,12 +65,26 @@ fetch("toronto.geojson")
         layer.bindPopup(feature.properties.INTERSECTION_DESC);
       }
     }).addTo(map);
+=======
+// Load geoJSON file and process location
+fetch("toronto.geojson") // Use the correct path to your geoJSON file
+  .then(res => res.json())
+  .then(data => {
+    // Automatically find nearest intersection on page load
+    refreshLocation(data);
+
+    // Button to refresh location
+    document.getElementById("refreshButton").addEventListener('click', function() {
+      refreshLocation(data);
+    });
+>>>>>>> 9b932cfe33cc4412d13a398b9ff8daeefecd1236
   })
   .catch(err => {
     console.error("Failed to load GeoJSON:", err);
   });
 
 // Function to handle location refresh and intersection matching
+<<<<<<< HEAD
 function refreshLocation(data, userLat, userLon) {
   // Call intersection-matching logic
   const result = findNearestIntersection(userLat, userLon, data.features);
@@ -138,3 +153,46 @@ navigator.geolocation.getCurrentPosition(
     document.getElementById("output").textContent = "⚠️ Unable to get location.";
   }
 );
+=======
+function refreshLocation(data) {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const userLat = position.coords.latitude;
+      const userLon = position.coords.longitude;
+
+      // Call intersection-matching logic
+      const result = findNearestIntersection(userLat, userLon, data.features);
+
+      const output = document.getElementById("output");
+      if (result) {
+        const { feature, distance } = result;
+        (async () => {
+          let intersectionName = feature.properties.INTERSECTION_DESC; // Intersection description
+
+          if (!intersectionName) {
+            intersectionName = await reverseGeocode(
+              feature.geometry.coordinates[0][1], // Latitude
+              feature.geometry.coordinates[0][0]  // Longitude
+            );
+          }
+
+          // Update #location-name with the intersection name
+          document.getElementById("location-name").textContent = intersectionName;
+
+          // Update output with nearest intersection info
+          output.innerHTML = `
+            🚦 Nearest Intersection: <strong>${intersectionName}</strong><br>
+            📏 Distance: ${distance.toFixed(2)} meters<br>
+            🧠 Note: ${feature.properties.NOTE || "None"}
+          `;
+        })();
+      } else {
+        output.innerHTML = `❌ No intersection found within 500 meters.`;
+      }
+    },
+    (error) => {
+      document.getElementById("output").textContent = "⚠️ Unable to get location.";
+    }
+  );
+}
+>>>>>>> 9b932cfe33cc4412d13a398b9ff8daeefecd1236
