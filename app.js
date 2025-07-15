@@ -44,62 +44,97 @@ async function reverseGeocode(lat, lon) {
   return data.display_name || "Unnamed Location";
 }
 
-// Load geoJSON file and process location
-fetch("toronto.geojson") // Use the correct path to your geoJSON file
+// Initialize the map
+const INITIAL_MAP_CENTER = [43.6532, -79.3832]; // Toronto coordinates as an example
+const INITIAL_MAP_ZOOM = 13;
+
+const map = L.map('map').setView(INITIAL_MAP_CENTER, INITIAL_MAP_ZOOM);
+
+// Add the tile layer (this is the background map)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+// Fetch geoJSON data and add it to the map
+fetch("toronto.geojson")
   .then(res => res.json())
   .then(data => {
-    // Automatically find nearest intersection on page load
-    refreshLocation(data);
-
-    // Button to refresh location
-    document.getElementById("refreshButton").addEventListener('click', function() {
-      refreshLocation(data);
-    });
+    L.geoJSON(data, {
+      onEachFeature: function (feature, layer) {
+        layer.bindPopup(feature.properties.INTERSECTION_DESC);
+      }
+    }).addTo(map);
   })
   .catch(err => {
     console.error("Failed to load GeoJSON:", err);
-    document.getElementById("output").textContent = "⚠️ Failed to load map data.";
   });
 
 // Function to handle location refresh and intersection matching
-function refreshLocation(data) {
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const userLat = position.coords.latitude;
-      const userLon = position.coords.longitude;
+function refreshLocation(data, userLat, userLon) {
+  // Call intersection-matching logic
+  const result = findNearestIntersection(userLat, userLon, data.features);
 
-      // Call intersection-matching logic
-      const result = findNearestIntersection(userLat, userLon, data.features);
+  const output = document.getElementById("output");
+  if (result) {
+    const { feature, distance } = result;
+    (async () => {
+      let intersectionName = feature.properties.INTERSECTION_DESC; // Intersection description
 
-      const output = document.getElementById("output");
-      if (result) {
-        const { feature, distance } = result;
-        (async () => {
-          let intersectionName = feature.properties.INTERSECTION_DESC; // Intersection description
-
-          if (!intersectionName) {
-            intersectionName = await reverseGeocode(
-              feature.geometry.coordinates[0][1], // Latitude
-              feature.geometry.coordinates[0][0]  // Longitude
-            );
-          }
-
-          // Update #location-name with the intersection name
-          document.getElementById("location-name").textContent = intersectionName;
-
-          // Update output with nearest intersection info
-          output.innerHTML = `
-            🚦 Nearest Intersection: <strong>${intersectionName}</strong><br>
-            📏 Distance: ${distance.toFixed(2)} meters<br>
-            🧠 Note: ${feature.properties.NOTE || "None"}
-          `;
-        })();
-      } else {
-        output.innerHTML = `❌ No intersection found within 500 meters.`;
+      if (!intersectionName) {
+        intersectionName = await reverseGeocode(
+          feature.geometry.coordinates[0][1], // Latitude
+          feature.geometry.coordinates[0][0]  // Longitude
+        );
       }
-    },
-    (error) => {
-      document.getElementById("output").textContent = "⚠️ Unable to get location.";
-    }
-  );
+
+      // Update #location-name with the intersection name
+      document.getElementById("location-name").textContent = intersectionName;
+
+      // Update output with nearest intersection info
+      output.innerHTML = `
+        🚦 Nearest Intersection: <strong>${intersectionName}</strong><br>
+        📏 Distance: ${distance.toFixed(2)} meters<br>
+        🧠 Note: ${feature.properties.NOTE || "None"}
+      `;
+    })();
+  } else {
+    output.innerHTML = `❌ No intersection found within 500 meters.`;
+  }
+
+  // Set the map view to the user's location
+  map.setView([userLat, userLon], 13);
+
+  // Add a marker for the user's location
+  L.marker([userLat, userLon]).addTo(map)
+    .bindPopup("You are here!")
+    .openPopup();
 }
+
+// Get user location and handle both map and intersection functionality
+navigator.geolocation.getCurrentPosition(
+  (position) => {
+    const userLat = position.coords.latitude;
+    const userLon = position.coords.longitude;
+
+    // Load geoJSON and process location
+    fetch("toronto.geojson")
+      .then(res => res.json())
+      .then(data => {
+        // Automatically find nearest intersection and refresh location
+        refreshLocation(data, userLat, userLon);
+
+        // Button to refresh location
+        document.getElementById("refreshButton").addEventListener('click', function() {
+          refreshLocation(data, userLat, userLon);
+        });
+      })
+      .catch(err => {
+        console.error("Failed to load GeoJSON:", err);
+        document.getElementById("output").textContent = "⚠️ Failed to load map data.";
+      });
+  },
+  (error) => {
+    console.error("Error getting location: ", error);
+    document.getElementById("output").textContent = "⚠️ Unable to get location.";
+  }
+);

@@ -33,7 +33,7 @@ body {
 
 .map-placeholder {
   width: 100%;
-  height: 250px;
+  height: 400px;
   background-color: #e0e0e0;
   display: flex;
   justify-content: center;
