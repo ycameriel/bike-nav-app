@@ -22,9 +22,9 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 // City Detection
 // ===============================
 const cities = {
-  toronto: { lat: 43.6532, lon: -79.3832, geojson: "data/toronto.geojson" },
-  unionville: { lat: 43.8765, lon: -79.2741, geojson: "data/unionville.geojson" },
-  mississauga: { lat: 43.5890, lon: -79.6441, geojson: "data/mississauga.geojson" },
+  toronto: { lat: 43.6532, lon: -79.3832, geojson: "datamaps/toronto.geojson" },
+  unionville: { lat: 43.8765, lon: -79.2741, geojson: "datamaps/unionville.geojson" },
+  mississauga: { lat: 43.5890, lon: -79.6441, geojson: "datamaps/mississauga.geojson" },
 };
 
 function getClosestCity(userLat, userLon) {
