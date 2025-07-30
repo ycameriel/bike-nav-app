@@ -1,18 +1,29 @@
+/*html takes full height*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+
 /* Main container styling */
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'inter', sans-serif;
   background-color: #f5f8fc;
   margin: 0;
   padding: 0;
   color: #1a1a1a;
 }
 
+
 /* Header */
 .app-header {
-  background-color: #002b5c;
+  background-color: #141414;
   color: white;
   text-align: center;
-  padding: 15px 10px;
+  padding: 15px 4x;
   font-size: 1rem;
 }
 
@@ -21,13 +32,22 @@ body {
   font-size: 1.2rem;
 }
 
-/* Map Styling */
+/* Map Styling - stretches map */
 #map {
-  height: 250px;
-  border-radius: 12px;
-  overflow: hidden;
-  margin: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/*map fills the space between header and footer*/
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 0;
 }
 
 /* Shrink attribution */
@@ -43,27 +63,13 @@ body {
   box-shadow: none;
 }
 
-/* Section blocks */
-section {
-  background: white;
-  margin: 12px 16px;
-  padding: 16px;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-/* Section headers */
-h2 {
-  font-size: 1.1rem;
-  margin-bottom: 10px;
-  color: #002b5c;
-}
 
 /* Tag-style buttons */
 .tag-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-bottom: 24px;
 }
 
 .tag {
@@ -79,4 +85,239 @@ h2 {
 
 .tag:hover {
   background-color: #d5e4f1;
+}
+
+/* Pull-up Drawer */
+.pullup-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70vh;
+  background: white;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -1px 6px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+  transform: translateY(80%); /* initial collapsed */
+  transition: transform 0.3s ease-in-out;
+  overscroll-behavior: contain;
+  max-height: 85vh;
+  overflow-y: auto;
+  z-index: 1000;
+  overflow: visible !important;
+}
+
+.pullup-container.open {
+  transform: translateY(0%);
+}
+
+.pullup-header {
+  text-align: center;
+  padding: 10px;
+  cursor: pointer;
+  background: #ffffff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+
+.pullup-handle {
+  width: 40px;
+  height: 5px;
+  background: #ccc;
+  margin: 0 auto 8px;
+  border-radius: 3px;
+}
+
+.pullup-content {
+  padding: 0 16px 20px;
+}
+
+.pullup-content h3 {
+  color: #000000;
+  font-size: 20px;        
+  font-weight: 550;         
+  margin-bottom: 16px;
+}
+
+
+.user-location-icon {
+  width: 18px;
+  height: 18px;
+  background-color: #007aff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0, 122, 255, 0.8);
+  animation: pulse 1.5s infinite;
+  z-index: 1000;
+}
+
+.leaflet-marker-icon {
+  z-index: 1000 !important;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
+
+/* pull up container top information */
+.location-toolbar {
+  padding: 12px 0 12px 0; /* top right bottom left */
+  background-color: white;
+}
+
+.location-subtext {
+  color: #464646;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.location-name {
+  margin: 4px 0 12px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+/* Base button style */
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #e6ecf3;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Button icon styling (SVG inside <img>) */
+.button-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(15%) sepia(2%) saturate(108%) hue-rotate(180deg);
+  transition: filter 0.2s ease;
+}
+
+/* Hover state */
+.toolbar-button:hover {
+  background-color: #d5d5d5;
+}
+
+/* Active (selected) button */
+.toolbar-button.active {
+  background-color: #1a1a1a;
+  color: white;
+}
+
+.toolbar-button.active .button-icon {
+  filter: brightness(0) invert(1); /* makes icon white */
+}
+
+/*explore by destination cards*/
+.destination-cards {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.destination-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 150px;
+  height: 170px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: #000;
+}
+
+.destination-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Frosted text overlay */
+.destination-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.4); /* semi-dark for contrast */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 16px;
+  letter-spacing: 1px;
+  line-height: 1.3;
+
+  /* Rounded bottom corners (now works with overflow hidden) */
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.destination-info strong {
+  display: inline-block;
+  font-weight: 500;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  vertical-align: top;
+}
+
+.destination-info span {
+  font-weight: 400; /* Normal */
+  font-size: 14px;
+}
+
+
+/* Floating location icon */
+.attached-location-icon {
+  position: absolute;
+  right: 20px;
+  top: -60px; /* raise it higher above the drawer */
+  background-color: white;
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 1010; /* ensure it's above the drawer content */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  pointer-events: auto; /* ensure it's still clickable */
+}
+
+.attached-location-icon:hover {
+  transform: scale(1.05);
+}
+
+.attached-location-icon img {
+  width: 24px;
+  height: 24px;
+  display: block;
 }
