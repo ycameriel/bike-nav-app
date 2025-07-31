@@ -1,4 +1,6 @@
-/*html takes full height*/
+/* =========================
+   Global Layout & Fonts
+========================= */
 html, body {
   height: 100%;
   margin: 0;
@@ -7,41 +9,61 @@ html, body {
   flex-direction: column;
 }
 
-
-/* Main container styling */
 body {
-  font-family: 'inter', sans-serif;
+  font-family: 'Inter', sans-serif;
   background-color: #f5f8fc;
+  color: #1a1a1a;
   margin: 0;
   padding: 0;
-  color: #1a1a1a;
 }
 
-
-/* Header */
+/* =========================
+   Header
+========================= */
+/* Floating header wrapper */
 .app-header {
-  background-color: #141414;
-  color: white;
-  text-align: center;
-  padding: 15px 4x;
+  display: flex;
+  justify-content: center;
+  position: fixed;
+  top: 16px;
+  left: 0;
+  width: 100%;
+  background: none;
+  z-index: 1100;
+  pointer-events: none;
+}
+
+/* Floating pill badge */
+.header-badge {
+  display: flex;
+  align-items: center;
+  background: rgba(20, 20, 20, 0.8);
+  padding: 8px 18px;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+/* Logo */
+.bike-logo {
+  width: 40px;
+  height: auto;
+  justify-content: left;
+}
+
+/* Title */
+.location-title {
+  font-family: 'Inter', sans-serif;
   font-size: 1rem;
-}
-
-.app-header h1 {
+  font-weight: 500;
+  color: white;
   margin: 0;
-  font-size: 1.2rem;
 }
 
-/* Map Styling - stretches map */
-#map {
-  flex: 1;
-  height: 100%;
-  margin: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-/*map fills the space between header and footer*/
+/* =========================
+   Map
+========================= */
 .app-main {
   flex: 1;
   display: flex;
@@ -50,44 +72,38 @@ body {
   z-index: 0;
 }
 
-/* Shrink attribution */
+#map {
+  flex: 1;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .leaflet-control-attribution {
   font-size: 10px;
   bottom: 4px !important;
   right: 4px !important;
 }
 
-/* Zoom buttons */
 .leaflet-control-zoom {
   border-radius: 8px;
   box-shadow: none;
 }
 
-
-/* Tag-style buttons */
-.tag-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-bottom: 24px;
+.leaflet-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  background: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
-.tag {
-  display: inline-block;
-  background-color: #e6ecf3;
-  color: #002b5c;
-  padding: 8px 12px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  white-space: nowrap;
-  transition: background-color 0.2s ease;
-}
-
-.tag:hover {
-  background-color: #d5e4f1;
-}
-
-/* Pull-up Drawer */
+/* =========================
+   Pull-up Drawer
+========================= */
 .pullup-container {
   position: fixed;
   bottom: 0;
@@ -98,18 +114,15 @@ body {
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   box-shadow: 0 -1px 6px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease;
-  transform: translateY(80%); /* initial collapsed */
   transition: transform 0.3s ease-in-out;
-  overscroll-behavior: contain;
-  max-height: 85vh;
-  overflow-y: auto;
+  transform: translateY(69%);
   z-index: 1000;
-  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
 }
 
 .pullup-container.open {
-  transform: translateY(0%);
+  transform: translateY(5%);
 }
 
 .pullup-header {
@@ -121,7 +134,6 @@ body {
   border-top-right-radius: 16px;
 }
 
-
 .pullup-handle {
   width: 40px;
   height: 5px;
@@ -130,7 +142,10 @@ body {
   border-radius: 3px;
 }
 
+/* Scrollable content */
 .pullup-content {
+  flex: 1;
+  overflow-y: auto;
   padding: 0 16px 20px;
 }
 
@@ -141,39 +156,11 @@ body {
   margin-bottom: 16px;
 }
 
-
-.user-location-icon {
-  width: 18px;
-  height: 18px;
-  background-color: #007aff;
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(0, 122, 255, 0.8);
-  animation: pulse 1.5s infinite;
-  z-index: 1000;
-}
-
-.leaflet-marker-icon {
-  z-index: 1000 !important;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.4);
-    opacity: 0.4;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-}
-
-/* pull up container top information */
+/* =========================
+   Top Location Info
+========================= */
 .location-toolbar {
-  padding: 12px 0 12px 0; /* top right bottom left */
+  padding: 12px 0;
   background-color: white;
 }
 
@@ -190,6 +177,7 @@ body {
   color: #000000;
 }
 
+/* Toolbar Buttons */
 .button-group {
   display: flex;
   flex-wrap: nowrap;
@@ -197,7 +185,6 @@ body {
   overflow-x: auto;
 }
 
-/* Base button style */
 .toolbar-button {
   display: flex;
   align-items: center;
@@ -212,7 +199,15 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Button icon styling (SVG inside <img>) */
+.toolbar-button:hover {
+  background-color: #d5d5d5;
+}
+
+.toolbar-button.active {
+  background-color: #1a1a1a;
+  color: white;
+}
+
 .button-icon {
   width: 16px;
   height: 16px;
@@ -220,22 +215,13 @@ body {
   transition: filter 0.2s ease;
 }
 
-/* Hover state */
-.toolbar-button:hover {
-  background-color: #d5d5d5;
-}
-
-/* Active (selected) button */
-.toolbar-button.active {
-  background-color: #1a1a1a;
-  color: white;
-}
-
 .toolbar-button.active .button-icon {
-  filter: brightness(0) invert(1); /* makes icon white */
+  filter: brightness(0) invert(1);
 }
 
-/*explore by destination cards*/
+/* =========================
+   Destination Cards
+========================= */
 .destination-cards {
   display: flex;
   gap: 16px;
@@ -258,25 +244,20 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
-/* Frosted text overlay */
 .destination-info {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   padding: 10px;
-  background-color: rgba(0, 0, 0, 0.4); /* semi-dark for contrast */
+  background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
   font-size: 16px;
   letter-spacing: 1px;
   line-height: 1.3;
-
-  /* Rounded bottom corners (now works with overflow hidden) */
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
 }
@@ -288,28 +269,27 @@ body {
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 100%;
-  vertical-align: top;
 }
 
 .destination-info span {
-  font-weight: 400; /* Normal */
+  font-weight: 400;
   font-size: 14px;
 }
 
-
-/* Floating location icon */
+/* =========================
+   Floating Location Icon
+========================= */
 .attached-location-icon {
   position: absolute;
   right: 20px;
-  top: -60px; /* raise it higher above the drawer */
+  top: -60px;
   background-color: white;
   border-radius: 50%;
   padding: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  z-index: 1010; /* ensure it's above the drawer content */
+  z-index: 1010;
   cursor: pointer;
   transition: transform 0.2s ease;
-  pointer-events: auto; /* ensure it's still clickable */
 }
 
 .attached-location-icon:hover {
@@ -319,5 +299,57 @@ body {
 .attached-location-icon img {
   width: 24px;
   height: 24px;
-  display: block;
+}
+
+/* =========================
+   Intersection Label
+========================= */
+.intersection-label {
+  background: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  font-weight: 500;
+  color: #003366;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  white-space: nowrap;
+}
+
+.intersection-marker {
+  width: 20px;
+  height: 20px;
+  background: #141414CC;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(26, 26, 26, 0.8);
+}
+
+/* =========================
+   You Tapped Here Pill
+========================= */
+.tapped-pill {
+  position: relative;
+  display: inline-block;
+  padding: 6px 14px;
+  background: rgba(26, 26, 26, 0.9);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Arrow pointer */
+.tapped-pill::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 12px 8px 0 8px;
+  border-style: solid;
+  border-color: rgba(20, 20, 20, 0.8) transparent transparent transparent;
 }

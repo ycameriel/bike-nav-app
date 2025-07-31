@@ -1,6 +1,6 @@
-let userMarker = null;
-let geoData = null;
-
+// ===============================
+// Utility Functions
+// ===============================
 function toRadians(degrees) {
   return degrees * Math.PI / 180;
 }
@@ -18,6 +18,32 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+// ===============================
+// City Detection
+// ===============================
+const cities = {
+  toronto: { lat: 43.6532, lon: -79.3832, geojson: "datamaps/toronto.geojson" },
+  markham: { lat: 43.8765, lon: -79.2741, geojson: "datamaps/markham.geojson" },
+  mississauga: { lat: 43.5890, lon: -79.6441, geojson: "datamaps/mississauga.geojson" },
+};
+
+function getClosestCity(userLat, userLon) {
+  let closestCity = null;
+  let minDistance = Infinity;
+  for (const city in cities) {
+    const { lat, lon } = cities[city];
+    const distance = haversineDistance(userLat, userLon, lat, lon);
+    if (distance < minDistance) {
+      closestCity = city;
+      minDistance = distance;
+    }
+  }
+  return closestCity;
+}
+
+// ===============================
+// Nearest Intersection Logic
+// ===============================
 function findNearestIntersection(userLat, userLon, features, maxDist = 500) {
   let nearest = null;
   let minDist = Infinity;
@@ -30,8 +56,7 @@ function findNearestIntersection(userLat, userLon, features, maxDist = 500) {
       nearest = feature;
     }
   }
-
-  return minDist <= maxDist ? { feature: nearest, distance: minDist } : null;
+  return (minDist <= maxDist) ? { feature: nearest, distance: minDist } : null;
 }
 
 async function reverseGeocode(lat, lon) {
@@ -41,158 +66,221 @@ async function reverseGeocode(lat, lon) {
   return data.display_name || "Unnamed Location";
 }
 
-// Initialize the map
-const map = L.map('map').setView([43.6532, -79.3832], 13);
+// ===============================
+// Dynamic Card Population
+// ===============================
+function populateCards(destinations, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
 
-L.tileLayer('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=hW9V0uL8z9tfFUhn1sjU', {
-  attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a> & OpenStreetMap contributors',
-  tileSize: 512,
-  zoomOffset: -1,
+  destinations.forEach(dest => {
+    const card = document.createElement("div");
+    card.classList.add("destination-card");
+    card.innerHTML = `
+      <img src="${dest.image}" alt="${dest.name}" />
+      <div class="destination-info">
+        <strong>${dest.name}</strong><br />
+        <span>${(dest.distance / 1000).toFixed(1)} km | ${Math.round(dest.distance / 200)} min</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function updateNearestDestinations(userLat, userLon, allDestinations) {
+  const destinationsWithDistance = allDestinations.map(dest => ({
+    ...dest,
+    distance: haversineDistance(userLat, userLon, dest.lat, dest.lon)
+  }));
+
+  const landmarks = destinationsWithDistance.filter(d => d.type === "landmark")
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 3);
+
+  const trails = destinationsWithDistance.filter(d => d.type !== "landmark")
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 3);
+
+  populateCards(landmarks, "destination-cards");
+  populateCards(trails, "trail-cards");
+}
+
+// ===============================
+// Leaflet Map Setup
+// ===============================
+const map = L.map('map').setView([43.6532, -79.3832], 13);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &copy; <a href="https://www.carto.com/">CARTO</a>',
+  subdomains: 'abcd',
   maxZoom: 20
 }).addTo(map);
 
-// Load GeoJSON and start tracking
-fetch("toronto.geojson")
-  .then(res => res.json())
-  .then(data => {
-    geoData = data;
-    startLiveLocationTracking();
-  })
-  .catch(err => {
-    console.error("Failed to load GeoJSON:", err);
-    document.getElementById("output").textContent = "⚠️ Failed to load map data.";
-  });
+// ===============================
+// Sample Destinations
+// ===============================
+const destinations = {
+  toronto: [
+    { name: "CN Tower", lat: 43.6426, lon: -79.3871, type: "landmark", image: "Images/CN_Tower.jpg" },
+    { name: "Royal Ontario Museum", lat: 43.6677, lon: -79.3948, type: "landmark", image: "Images/ROM_Crystal.jpg"},
+    { name: "Art Gallery of Ontario (AGO)", lat: 43.6532, lon: -79.3936, type: "landmark", image: "Images/AGO.jpg" },
+    { name: "Toronto Zoo", lat: 43.8122, lon: -79.1887, type: "landmark", image: "Images/Toronto_Zoo.jpg" },
+    { name: "Casa Loma", lat: 43.6777, lon: -79.4096, type: "landmark", image: "Images/Casa_Loma.jpg" },
+    { name: "Yonge-Dundas Square", lat: 43.6562, lon: -79.3808, type: "landmark", image: "Images/dundas_square.jpg" },
+    { name: "High Park", lat: 43.6465, lon: -79.4630, type: "nature", image: "Images/High_Park.jpg" },
+    { name: "Bluffer's Park", lat: 43.7045, lon: -79.2500, type: "nature", image: "Images/Bluffers_Park.jpg" },
+    { name: "Toronto Islands", lat: 43.6187, lon: -79.3794, type: "nature", image: "Images/Toronto_Islands.jpg" },
+    { name: "Edwards Gardens", lat: 43.7658, lon: -79.3370, type: "nature", image: "Images/Edwards_Garden.jpg" },
+    { name: "Trinity Bellwoods Park", lat: 43.6475, lon: -79.4145, type: "nature", image: "Images/Trinity_Bellwoods.jpg" },
+    { name: "Don Valley Brick Works Park", lat: 43.6933, lon: -79.3582, type: "nature", image: "Images/Brickworks.png" },
+    { name: "Tommy Thompson Park", lat: 43.6415, lon: -79.3002, type: "nature", image: "Images/Tommy_Thompson.jpg" },
+    { name: "Martin Goodman Trail", lat: 43.6547, lon: -79.3675, type: "nature", image: "Images/Martin_Goodman.jpg"},
+    { name: "Don River Trails", lat: 43.6713, lon: -79.3560, type: "nature", image: "Images/Don_River.jpg"},
+    { name: "Humber River Recreational Trail", lat: 43.6391, lon: -79.5100, type: "nature", image: "Images/Humber_River.jpg" },
+    { name: "Lower Don Recreational Trail", lat: 43.6613, lon: -79.3489, type: "nature", image: "Images/Lower_Don.jpg"}
+  ],
 
-fetch("markham.geojson")
-  .then(res => res.json())
-  .then(data => {
-    L.geoJSON(data, {
-      onEachFeature: function (feature, layer) {
-        const label = feature.properties.name || feature.properties.INTERSECTION_DESC || "Feature";
-        layer.bindPopup(label);
-      },
-      style: {
-        color: "#ff7800",
-        weight: 2,
-        opacity: 0.8
-      }
-    }).addTo(map);
-  })
-  .catch(err => {
-    console.error("Failed to load Markham GeoJSON:", err);
-  });
+  markham: [
+    { name: "Markham Museum", lat: 43.8765, lon: -79.2741, type: "landmark", image: "Images/Markham_Museum.jpg" },
+    { name: "Markham Civic Centre", lat: 43.8783, lon: -79.2639, type: "landmark", image: "Images/Markham_Civic.jpg" },
+    { name: "Historic Main Street Unionville", lat: 43.8612, lon: -79.2500, type: "landmark", image: "Images/Unionville.jpeg" },
+    { name: "Markham Pan Am Centre", lat: 43.8765, lon: -79.2741, type: "landmark", image: "Images/PanAM.jpg" },
+    { name: "Main Street Markham", lat: 43.8619, lon: -79.3240, type: "landmark", image: "Images/MainStreet.jpg" },
+    { name: "Toogood Pond Park", lat: 43.8974, lon: -79.2736, type: "nature", image: "Images/Toogood.jpg" },
+    { name: "Rouge National Urban Park", lat: 43.8632, lon: -79.1569, type: "nature", image: "Images/Rouge.jpg" },
+    { name: "Milne Dam Conservation Park", lat: 43.8983, lon: -79.2715, type: "nature", image: "Images/Milne_Dam.jpg" }
+  ],
 
-function startLiveLocationTracking() {
-  // First location
-  navigator.geolocation.getCurrentPosition(updateLocation, locationError);
+  mississauga: [
+    { name: "Port Credit Lighthouse", lat: 43.5515, lon: -79.5861, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Port_Credit_Lighthouse.jpg" },
+    { name: "Mississauga Celebration Square", lat: 43.5890, lon: -79.6441, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/6/62/Mississauga_Celebration_Square.jpg" },
+    { name: "Square One Shopping Centre", lat: 43.5931, lon: -79.6417, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Square_One_Shopping_Centre.jpg" },
+    { name: "Lakefront Promenade Park", lat: 43.5510, lon: -79.5580, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/7/75/Lakefront_Promenade_Park.jpg" },
+    { name: "Jack Darling Memorial Park", lat: 43.5124, lon: -79.6190, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/5/50/Jack_Darling_Memorial_Park.jpg" },
+    { name: "Rattray Marsh Conservation Area", lat: 43.5142, lon: -79.6207, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/3/30/Rattray_Marsh_Conservation_Area.jpg" }
+  ]
+};
 
-  // Update every 10 seconds
-  setInterval(() => {
-    navigator.geolocation.getCurrentPosition(updateLocation, locationError);
-  }, 10000);
-}
+// ===============================
+// Marker Icons & Styles
+// ===============================
+const userIcon = L.divIcon({ html: '<div class="pulse-marker"></div>', className: '', iconSize: [20, 20] });
+const intersectionIcon = L.divIcon({ html: '<div class="intersection-marker"></div>', className: '', iconSize: [20, 20] });
 
-function updateLocation(position) {
+const style = document.createElement('style');
+style.innerHTML = `
+  .pulse-marker {
+    width: 16px; height: 16px; background: #007bff;
+    border: 2px solid #fff; border-radius: 50%;
+    box-shadow: 0 0 6px rgba(0,123,255,0.8);
+    animation: pulseUser 1.5s infinite;
+  }
+  @keyframes pulseUser {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 0.9; }
+  }
+`;
+document.head.appendChild(style);
+
+let circleAnimationId = null;
+
+// ===============================
+// Main Flow
+// ===============================
+navigator.geolocation.getCurrentPosition(async position => {
   const userLat = position.coords.latitude;
   const userLon = position.coords.longitude;
-  refreshLocation(geoData, userLat, userLon);
-}
 
-function locationError(error) {
-  console.error("Geolocation error:", error);
-  document.getElementById("output").textContent = "⚠️ Unable to get location.";
-}
+  const closestCity = getClosestCity(userLat, userLon);
+  const geojsonUrl = cities[closestCity].geojson;
 
-function refreshLocation(data, userLat, userLon) {
-  const result = findNearestIntersection(userLat, userLon, data.features);
-  const output = document.getElementById("output");
+  try {
+    const response = await fetch(geojsonUrl);
+    const data = await response.json();
+    const result = findNearestIntersection(userLat, userLon, data.features);
 
-  if (result) {
-    const { feature, distance } = result;
-    (async () => {
-      let intersectionName = feature.properties.INTERSECTION_DESC;
-      if (!intersectionName) {
-        intersectionName = await reverseGeocode(
-          feature.geometry.coordinates[0][1],
-          feature.geometry.coordinates[0][0]
-        );
+    let intersectionCoords;
+    if (result) {
+      intersectionCoords = [
+        result.feature.geometry.coordinates[0][1],
+        result.feature.geometry.coordinates[0][0]
+      ];
+
+      const circle = L.circle(intersectionCoords, {
+        color: '#1a1a1a', fillColor: '#1a1a1a',
+        fillOpacity: 0.3, radius: 10
+      }).addTo(map);
+
+      L.marker(intersectionCoords, { icon: intersectionIcon }).addTo(map);
+
+    // Stop any previous animation
+    if (circleAnimationId) {
+      clearInterval(circleAnimationId);
+      circleAnimationId = null;
+    }
+
+    let growing = true;
+    const minRadius = 10;
+    const maxRadius = 25;
+    const step = 3;
+
+    // Start new animation safely
+    circleAnimationId = setInterval(() => {
+      if (!circle || !map.hasLayer(circle)) {
+        clearInterval(circleAnimationId);
+        circleAnimationId = null;
+        return;
       }
 
-      document.getElementById("location-name").textContent = intersectionName;
-      output.innerHTML = `
-        🚦 Nearest Intersection: <strong>${intersectionName}</strong><br>
-        📏 Distance: ${distance.toFixed(2)} meters<br>
-        🧠 Note: ${feature.properties.NOTE || "None"}
-      `;
-    })();
-  } else {
-    output.innerHTML = `❌ No intersection found within 500 meters.`;
+      const currentRadius = circle.getRadius();
+      const newRadius = growing ? currentRadius + step : currentRadius - step;
+
+      circle.setRadius(newRadius);
+
+      // Reverse direction when hitting limits
+      if (newRadius >= maxRadius) { 
+        growing = false;
+      } else if (newRadius <= minRadius) {
+        growing = true;
+      }
+    }, 200);
+
+      const tappedHereLabel = L.divIcon({
+        html: `<div class="tapped-pill">You Tapped Here</div>`,
+        className: '',
+        iconSize: [120, 40],
+        iconAnchor: [65, 55]
+      });
+
+      L.marker(intersectionCoords, { icon: tappedHereLabel }).addTo(map);
+    } else {
+      intersectionCoords = [userLat, userLon];
+    }
+
+    document.getElementById("location-name").textContent = result
+      ? result.feature.properties.INTERSECTION_DESC
+      : await reverseGeocode(userLat, userLon);
+
+    const userMarker = L.marker([userLat, userLon], { icon: userIcon }).addTo(map);
+    const bounds = L.latLngBounds([userMarker.getLatLng(), intersectionCoords]);
+    map.fitBounds(bounds, { padding: [75, 75], maxZoom: 16.5 });
+
+  } catch (e) {
+    console.error("Failed to load intersection GeoJSON:", e);
+    document.getElementById("location-name").textContent = await reverseGeocode(userLat, userLon);
+    L.marker([userLat, userLon]).addTo(map).bindPopup("You are here!").openPopup();
+    map.setView([userLat, userLon], 14);
   }
 
-  // Smooth pan to current location
-  map.flyTo([userLat, userLon], 15);
-
-  // Pulsing marker
-  if (userMarker) {
-    userMarker.setLatLng([userLat, userLon]);
-  } else {
-    const pulsingIcon = L.divIcon({
-      className: 'user-location-icon',
-      iconSize: [18, 18]
-    });
-
-    userMarker = L.marker([userLat, userLon], { icon: pulsingIcon })
-      .addTo(map)
-      .bindPopup("📍 You are here!");
-  }
-}
-
-// Pull-up drawer drag interaction
-const drawer = document.querySelector('.pullup-container');
-const handle = document.querySelector('.pullup-header');
-
-handle.addEventListener('click', () => {
-  drawer.classList.toggle('open');
+  updateNearestDestinations(userLat, userLon, destinations[closestCity] || []);
+}, error => {
+  console.error("Error getting location:", error);
+  document.getElementById("location-name").textContent = "Unable to get location.";
 });
 
-let startY = 0;
-let currentY = 0;
-let isDragging = false;
-
-handle.addEventListener('mousedown', startDrag);
-handle.addEventListener('touchstart', startDrag);
-
-function startDrag(e) {
-  isDragging = true;
-  startY = e.touches ? e.touches[0].clientY : e.clientY;
-  document.addEventListener('mousemove', onDrag);
-  document.addEventListener('touchmove', onDrag);
-  document.addEventListener('mouseup', endDrag);
-  document.addEventListener('touchend', endDrag);
-}
-
-function onDrag(e) {
-  if (!isDragging) return;
-  currentY = e.touches ? e.touches[0].clientY : e.clientY;
-  const deltaY = currentY - startY;
-
-  if (deltaY > 50) drawer.classList.remove('open');
-  else if (deltaY < -50) drawer.classList.add('open');
-}
-
-function endDrag() {
-  isDragging = false;
-  document.removeEventListener('mousemove', onDrag);
-  document.removeEventListener('touchmove', onDrag);
-  document.removeEventListener('mouseup', endDrag);
-  document.removeEventListener('touchend', endDrag);
-}
-
-//top pull up containter clicked interaction
-document.querySelectorAll('.toolbar-button').forEach(button => {
-  button.addEventListener('click', () => {
-    document.querySelectorAll('.toolbar-button').forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
-  });
+// Toggle Pull-up Container
+const pullupContainer = document.querySelector('.pullup-container');
+const pullupHeader = document.getElementById('pullup-header');
+pullupHeader.addEventListener('click', () => {
+  pullupContainer.classList.toggle('open');
 });
-
