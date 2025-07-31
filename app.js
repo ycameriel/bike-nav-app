@@ -6,7 +6,7 @@ function toRadians(degrees) {
 }
 
 function haversineDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371000; // Earth's radius in meters
+  const R = 6371000;
   const dLat = toRadians(lat2 - lat1);
   const dLon = toRadians(lon2 - lon1);
 
@@ -23,7 +23,7 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 // ===============================
 const cities = {
   toronto: { lat: 43.6532, lon: -79.3832, geojson: "datamaps/toronto.geojson" },
-  unionville: { lat: 43.8765, lon: -79.2741, geojson: "datamaps/unionville.geojson" },
+  markham: { lat: 43.8765, lon: -79.2741, geojson: "datamaps/markham.geojson" },
   mississauga: { lat: 43.5890, lon: -79.6441, geojson: "datamaps/mississauga.geojson" },
 };
 
@@ -49,14 +49,13 @@ function findNearestIntersection(userLat, userLon, features, maxDist = 500) {
   let minDist = Infinity;
 
   for (const feature of features) {
-    const [lon, lat] = feature.geometry.coordinates[0]; // MultiPoint handling
+    const [lon, lat] = feature.geometry.coordinates[0];
     const dist = haversineDistance(userLat, userLon, lat, lon);
     if (dist < minDist) {
       minDist = dist;
       nearest = feature;
     }
   }
-
   return (minDist <= maxDist) ? { feature: nearest, distance: minDist } : null;
 }
 
@@ -70,9 +69,6 @@ async function reverseGeocode(lat, lon) {
 // ===============================
 // Dynamic Card Population
 // ===============================
-const destinationContainer = document.getElementById("destination-cards");
-const trailContainer = document.getElementById("trail-cards");
-
 function populateCards(destinations, containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
@@ -113,8 +109,10 @@ function updateNearestDestinations(userLat, userLon, allDestinations) {
 // Leaflet Map Setup
 // ===============================
 const map = L.map('map').setView([43.6532, -79.3832], 13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap'
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &copy; <a href="https://www.carto.com/">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 20
 }).addTo(map);
 
 // ===============================
@@ -122,35 +120,34 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // ===============================
 const destinations = {
   toronto: [
-    { name: "CN Tower", lat: 43.6426, lon: -79.3871, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/9/9f/CN_Tower_Toronto_2019.jpg" },
-    { name: "Royal Ontario Museum", lat: 43.6677, lon: -79.3948, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/1/16/Royal_Ontario_Museum.jpg" },
-    { name: "Art Gallery of Ontario (AGO)", lat: 43.6532, lon: -79.3936, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/1/10/Art_Gallery_of_Ontario.jpg" },
-    { name: "Toronto Zoo", lat: 43.8122, lon: -79.1887, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/4/4f/Toronto_Zoo_entrance.jpg" },
-    { name: "Casa Loma", lat: 43.6777, lon: -79.4096, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Casa_Loma_Toronto.jpg" },
-    { name: "Yonge-Dundas Square", lat: 43.6562, lon: -79.3808, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/e/eb/Yonge-Dundas_Square.jpg" },
-    { name: "High Park", lat: 43.6465, lon: -79.4630, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/6/6d/High_Park_Cherry_Blossoms.jpg" },
-    { name: "Bluffer's Park", lat: 43.7045, lon: -79.2500, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/8/84/Scarborough_Bluffs_Park.jpg" },
-    { name: "Toronto Islands", lat: 43.6187, lon: -79.3794, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/4/45/Toronto_Islands.jpg" },
-    { name: "Edwards Gardens", lat: 43.7658, lon: -79.3370, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/3/37/Edwards_Gardens_Toronto.jpg" },
-    { name: "Trinity Bellwoods Park", lat: 43.6475, lon: -79.4145, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Trinity_Bellwoods_Park_Toronto.jpg" },
-    { name: "Don Valley Brick Works Park", lat: 43.6933, lon: -79.3582, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Evergreen_Brick_Works.jpg" },
-    { name: "Tommy Thompson Park", lat: 43.6415, lon: -79.3002, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/e/e2/Tommy_Thompson_Park.jpg" },
-    { name: "Martin Goodman Trail", lat: 43.6547, lon: -79.3675, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/a/af/Martin_Goodman_Trail.jpg" },
-    { name: "Don River Trails", lat: 43.6713, lon: -79.3560, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Don_River_Trail_Toronto.jpg" },
-    { name: "Humber River Recreational Trail", lat: 43.6391, lon: -79.5100, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Humber_River_Trail.jpg" },
-    { name: "Lower Don Recreational Trail", lat: 43.6613, lon: -79.3489, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/e/e3/Lower_Don_Trail.jpg" }
+    { name: "CN Tower", lat: 43.6426, lon: -79.3871, type: "landmark", image: "Images/CN_Tower.jpg" },
+    { name: "Royal Ontario Museum", lat: 43.6677, lon: -79.3948, type: "landmark", image: "Images/ROM_Crystal.jpg"},
+    { name: "Art Gallery of Ontario (AGO)", lat: 43.6532, lon: -79.3936, type: "landmark", image: "Images/AGO.jpg" },
+    { name: "Toronto Zoo", lat: 43.8122, lon: -79.1887, type: "landmark", image: "Images/Toronto_Zoo.jpg" },
+    { name: "Casa Loma", lat: 43.6777, lon: -79.4096, type: "landmark", image: "Images/Casa_Loma.jpg" },
+    { name: "Yonge-Dundas Square", lat: 43.6562, lon: -79.3808, type: "landmark", image: "Images/dundas_square.jpg" },
+    { name: "High Park", lat: 43.6465, lon: -79.4630, type: "nature", image: "Images/High_Park.jpg" },
+    { name: "Bluffer's Park", lat: 43.7045, lon: -79.2500, type: "nature", image: "Images/Bluffers_Park.jpg" },
+    { name: "Toronto Islands", lat: 43.6187, lon: -79.3794, type: "nature", image: "Images/Toronto_Islands.jpg" },
+    { name: "Edwards Gardens", lat: 43.7658, lon: -79.3370, type: "nature", image: "Images/Edwards_Garden.jpg" },
+    { name: "Trinity Bellwoods Park", lat: 43.6475, lon: -79.4145, type: "nature", image: "Images/Trinity_Bellwoods.jpg" },
+    { name: "Don Valley Brick Works Park", lat: 43.6933, lon: -79.3582, type: "nature", image: "Images/Brickworks.png" },
+    { name: "Tommy Thompson Park", lat: 43.6415, lon: -79.3002, type: "nature", image: "Images/Tommy_Thompson.jpg" },
+    { name: "Martin Goodman Trail", lat: 43.6547, lon: -79.3675, type: "nature", image: "Images/Martin_Goodman.jpg"},
+    { name: "Don River Trails", lat: 43.6713, lon: -79.3560, type: "nature", image: "Images/Don_River.jpg"},
+    { name: "Humber River Recreational Trail", lat: 43.6391, lon: -79.5100, type: "nature", image: "Images/Humber_River.jpg" },
+    { name: "Lower Don Recreational Trail", lat: 43.6613, lon: -79.3489, type: "nature", image: "Images/Lower_Don.jpg"}
   ],
 
   markham: [
-    { name: "Markham Museum", lat: 43.8765, lon: -79.2741, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/1/19/Markham_Museum.jpg" },
-    { name: "Markham Civic Centre", lat: 43.8783, lon: -79.2639, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/d/d9/Markham_Civic_Centre.jpg" },
-    { name: "Historic Main Street Unionville", lat: 43.8612, lon: -79.2500, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/3/3c/Unionville_Main_Street.jpg" },
-    { name: "CF Markville Shopping Centre", lat: 43.8657, lon: -79.3129, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/7/7c/CF_Markville.jpg" },
-    { name: "Markham Pan Am Centre", lat: 43.8765, lon: -79.2741, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/8/8d/Markham_Pan_Am_Centre.jpg" },
-    { name: "Main Street Markham", lat: 43.8619, lon: -79.3240, type: "landmark", image: "https://upload.wikimedia.org/wikipedia/commons/7/75/Main_Street_Markham.jpg" },
-    { name: "Toogood Pond Park", lat: 43.8974, lon: -79.2736, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/5/56/Toogood_Pond.jpg" },
-    { name: "Rouge National Urban Park", lat: 43.8632, lon: -79.1569, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/5/50/Rouge_National_Urban_Park.jpg" },
-    { name: "Milne Dam Conservation Park", lat: 43.8983, lon: -79.2715, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/3/3d/Milne_Dam_Conservation_Park.jpg" }
+    { name: "Markham Museum", lat: 43.8765, lon: -79.2741, type: "landmark", image: "Images/Markham_Museum.jpg" },
+    { name: "Markham Civic Centre", lat: 43.8783, lon: -79.2639, type: "landmark", image: "Images/Markham_Civic.jpg" },
+    { name: "Historic Main Street Unionville", lat: 43.8612, lon: -79.2500, type: "landmark", image: "Images/Unionville.jpeg" },
+    { name: "Markham Pan Am Centre", lat: 43.8765, lon: -79.2741, type: "landmark", image: "Images/PanAM.jpg" },
+    { name: "Main Street Markham", lat: 43.8619, lon: -79.3240, type: "landmark", image: "Images/MainStreet.jpg" },
+    { name: "Toogood Pond Park", lat: 43.8974, lon: -79.2736, type: "nature", image: "Images/Toogood.jpg" },
+    { name: "Rouge National Urban Park", lat: 43.8632, lon: -79.1569, type: "nature", image: "Images/Rouge.jpg" },
+    { name: "Milne Dam Conservation Park", lat: 43.8983, lon: -79.2715, type: "nature", image: "Images/Milne_Dam.jpg" }
   ],
 
   mississauga: [
@@ -164,69 +161,123 @@ const destinations = {
 };
 
 // ===============================
+// Marker Icons & Styles
+// ===============================
+const userIcon = L.divIcon({ html: '<div class="pulse-marker"></div>', className: '', iconSize: [20, 20] });
+const intersectionIcon = L.divIcon({ html: '<div class="intersection-marker"></div>', className: '', iconSize: [20, 20] });
+
+const style = document.createElement('style');
+style.innerHTML = `
+  .pulse-marker {
+    width: 16px; height: 16px; background: #007bff;
+    border: 2px solid #fff; border-radius: 50%;
+    box-shadow: 0 0 6px rgba(0,123,255,0.8);
+    animation: pulseUser 1.5s infinite;
+  }
+  @keyframes pulseUser {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 0.9; }
+  }
+  .intersection-marker {
+    width: 20px; height: 20px; background: #003366;
+    border: 2px solid #fff; border-radius: 50%;
+    box-shadow: 0 0 6px rgba(0,51,102,0.8);
+  }
+  .tapped-here-badge {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+    background: rgba(20, 20, 20, 0.9);
+    padding: 4px 12px;
+    border-radius: 40px;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+`;
+document.head.appendChild(style);
+
+let circleAnimationId = null;
+
+// ===============================
 // Main Flow
 // ===============================
-navigator.geolocation.getCurrentPosition(
-  async position => {
-    const userLat = position.coords.latitude;
-    const userLon = position.coords.longitude;
+navigator.geolocation.getCurrentPosition(async position => {
+  const userLat = position.coords.latitude;
+  const userLon = position.coords.longitude;
 
-    // Detect nearest city
-    const closestCity = getClosestCity(userLat, userLon);
+  const closestCity = getClosestCity(userLat, userLon);
+  const geojsonUrl = cities[closestCity].geojson;
 
-    // Load intersection GeoJSON for that city
-    const geojsonUrl = cities[closestCity].geojson;
-    try {
-      const response = await fetch(geojsonUrl);
-      const data = await response.json();
-      const result = findNearestIntersection(userLat, userLon, data.features);
+  try {
+    const response = await fetch(geojsonUrl);
+    const data = await response.json();
+    const result = findNearestIntersection(userLat, userLon, data.features);
 
-      let intersectionName;
-      let intersectionCoords;
-      if (result) {
-        intersectionName = result.feature.properties.INTERSECTION_DESC;
-        intersectionCoords = [
-          result.feature.geometry.coordinates[0][1],
-          result.feature.geometry.coordinates[0][0]
-        ];
+    let intersectionCoords;
+    if (result) {
+      intersectionCoords = [
+        result.feature.geometry.coordinates[0][1],
+        result.feature.geometry.coordinates[0][0]
+      ];
 
-        // Add intersection marker
-        L.marker(intersectionCoords).addTo(map)
-          .bindPopup(`<b>${intersectionName}</b><br>${result.distance.toFixed(1)} m away`)
-          .openPopup();
-      } else {
-        intersectionName = await reverseGeocode(userLat, userLon);
-        intersectionCoords = [userLat, userLon];
-      }
+      // Intersection pulse circle
+      const circle = L.circle(intersectionCoords, {
+        color: '#003366', fillColor: '#003366',
+        fillOpacity: 0.3, radius: 10
+      }).addTo(map);
 
-      // Update UI location name
-      document.getElementById("location-name").textContent = intersectionName;
+      if (circleAnimationId) clearInterval(circleAnimationId);
+      let growing = true;
+      circleAnimationId = setInterval(() => {
+        const currentRadius = circle.getRadius();
+        if (growing) {
+          circle.setRadius(currentRadius + 3);
+          if (currentRadius >= 25) growing = false;
+        } else {
+          circle.setRadius(currentRadius - 3);
+          if (currentRadius <= 10) growing = true;
+        }
+      }, 200);
 
-      // Fit map bounds to show user and intersection
-      const userMarker = L.marker([userLat, userLon]).addTo(map).bindPopup("You are here!");
-      const bounds = L.latLngBounds([userMarker.getLatLng(), intersectionCoords]);
-      map.fitBounds(bounds, { padding: [50, 50] });
-
-    } catch (e) {
-      console.error("Failed to load intersection GeoJSON:", e);
-      document.getElementById("location-name").textContent = await reverseGeocode(userLat, userLon);
-      L.marker([userLat, userLon]).addTo(map).bindPopup("You are here!").openPopup();
-      map.setView([userLat, userLon], 14);
+      // "You Tapped Here" pill label
+      const tappedHereLabel = L.divIcon({
+        html: `<div class="tapped-here-badge">You Tapped Here</div>`,
+        className: '',
+        iconSize: [120, 40],
+        iconAnchor: [60, 60]
+      });
+      L.marker([intersectionCoords[0] + 0.0002, intersectionCoords[1]], { icon: tappedHereLabel }).addTo(map);
+    } else {
+      intersectionCoords = [userLat, userLon];
     }
 
-    // Populate nearest destinations
-    updateNearestDestinations(userLat, userLon, destinations[closestCity] || []);
-  },
-  error => {
-    console.error("Error getting location:", error);
-    document.getElementById("location-name").textContent = "Unable to get location.";
+    document.getElementById("location-name").textContent = result
+      ? result.feature.properties.INTERSECTION_DESC
+      : await reverseGeocode(userLat, userLon);
+
+    const userMarker = L.marker([userLat, userLon], { icon: userIcon }).addTo(map);
+    const bounds = L.latLngBounds([userMarker.getLatLng(), intersectionCoords]);
+    map.fitBounds(bounds, { padding: [75, 75], maxZoom: 16.5 });
+
+  } catch (e) {
+    console.error("Failed to load intersection GeoJSON:", e);
+    document.getElementById("location-name").textContent = await reverseGeocode(userLat, userLon);
+    L.marker([userLat, userLon]).addTo(map).bindPopup("You are here!").openPopup();
+    map.setView([userLat, userLon], 14);
   }
-);
+
+  updateNearestDestinations(userLat, userLon, destinations[closestCity] || []);
+}, error => {
+  console.error("Error getting location:", error);
+  document.getElementById("location-name").textContent = "Unable to get location.";
+});
 
 // Toggle Pull-up Container
 const pullupContainer = document.querySelector('.pullup-container');
 const pullupHeader = document.getElementById('pullup-header');
-
 pullupHeader.addEventListener('click', () => {
   pullupContainer.classList.toggle('open');
 });
