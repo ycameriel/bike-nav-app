@@ -213,21 +213,35 @@ navigator.geolocation.getCurrentPosition(async position => {
 
       L.marker(intersectionCoords, { icon: intersectionIcon }).addTo(map);
 
+    // Stop any previous animation
     if (circleAnimationId) {
       clearInterval(circleAnimationId);
+      circleAnimationId = null;
     }
 
     let growing = true;
-    circleAnimationId = setInterval(() => {
-      if (!circle) return; // Ensure circle exists
-      const currentRadius = circle.getRadius();
+    const minRadius = 10;
+    const maxRadius = 25;
+    const step = 3;
 
-      if (growing) {
-        circle.setRadius(currentRadius + 3);
-        if (currentRadius + 3 >= 25) growing = false;
-      } else {
-        circle.setRadius(currentRadius - 3);
-        if (currentRadius - 3 <= 10) growing = true;
+    // Start new animation safely
+    circleAnimationId = setInterval(() => {
+      if (!circle || !map.hasLayer(circle)) {
+        clearInterval(circleAnimationId);
+        circleAnimationId = null;
+        return;
+      }
+
+      const currentRadius = circle.getRadius();
+      const newRadius = growing ? currentRadius + step : currentRadius - step;
+
+      circle.setRadius(newRadius);
+
+      // Reverse direction when hitting limits
+      if (newRadius >= maxRadius) { 
+        growing = false;
+      } else if (newRadius <= minRadius) {
+        growing = true;
       }
     }, 200);
 
