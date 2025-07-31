@@ -179,23 +179,6 @@ style.innerHTML = `
     50% { transform: scale(1.05); opacity: 0.5; }
     100% { transform: scale(1); opacity: 0.9; }
   }
-  .intersection-marker {
-    width: 20px; height: 20px; background: #003366;
-    border: 2px solid #fff; border-radius: 50%;
-    box-shadow: 0 0 6px rgba(0,51,102,0.8);
-  }
-  .tapped-here-badge {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #fff;
-    background: rgba(20, 20, 20, 0.9);
-    padding: 4px 12px;
-    border-radius: 40px;
-    white-space: nowrap;
-    pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
 `;
 document.head.appendChild(style);
 
@@ -225,9 +208,12 @@ navigator.geolocation.getCurrentPosition(async position => {
 
       // Intersection pulse circle
       const circle = L.circle(intersectionCoords, {
-        color: '#003366', fillColor: '#003366',
+        color: '#1a1a1a', fillColor: '#1a1a1a',
         fillOpacity: 0.3, radius: 10
       }).addTo(map);
+
+      // Add intersection icon marker
+      L.marker(intersectionCoords, { icon: intersectionIcon }).addTo(map);
 
       if (circleAnimationId) clearInterval(circleAnimationId);
       let growing = true;
@@ -244,12 +230,14 @@ navigator.geolocation.getCurrentPosition(async position => {
 
       // "You Tapped Here" pill label
       const tappedHereLabel = L.divIcon({
-        html: `<div class="tapped-here-badge">You Tapped Here</div>`,
+        html: `<div class="tapped-pill">You Tapped Here</div>`,
         className: '',
         iconSize: [120, 40],
-        iconAnchor: [60, 60]
+        iconAnchor: [65, 55]
       });
-      L.marker([intersectionCoords[0] + 0.0002, intersectionCoords[1]], { icon: tappedHereLabel }).addTo(map);
+
+      L.marker(intersectionCoords, { icon: tappedHereLabel }).addTo(map);
+
     } else {
       intersectionCoords = [userLat, userLon];
     }

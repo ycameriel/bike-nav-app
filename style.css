@@ -115,14 +115,14 @@ body {
   border-top-right-radius: 16px;
   box-shadow: 0 -1px 6px rgba(0,0,0,0.1);
   transition: transform 0.3s ease-in-out;
-  transform: translateY(80%);
+  transform: translateY(69%);
   z-index: 1000;
   display: flex;
   flex-direction: column;
 }
 
 .pullup-container.open {
-  transform: translateY(05%);
+  transform: translateY(5%);
 }
 
 .pullup-header {
@@ -316,27 +316,40 @@ body {
   white-space: nowrap;
 }
 
+.intersection-marker {
+  width: 20px;
+  height: 20px;
+  background: #141414CC;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(26, 26, 26, 0.8);
+}
+
 /* =========================
    You Tapped Here Pill
 ========================= */
-.tapped-here-badge {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  padding: 6px 12px;
-  background: rgba(20, 20, 20, 0.9);
+.tapped-pill {
+  position: relative;
+  display: inline-block;
+  padding: 6px 14px;
+  background: rgba(26, 26, 26, 0.9);
   color: #fff;
   font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 500;
   border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   white-space: nowrap;
-  pointer-events: none;
-  line-height: 1.2;
-  transform: translate(5px, 5px); /* offset bottom-right */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
-.leaflet-zoom-animated .tapped-here-badge {
-  transform: translate(5px, 5px) scale(1) !important;
+/* Arrow pointer */
+.tapped-pill::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 12px 8px 0 8px;
+  border-style: solid;
+  border-color: rgba(20, 20, 20, 0.8) transparent transparent transparent;
 }
