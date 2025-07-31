@@ -70,6 +70,9 @@ async function reverseGeocode(lat, lon) {
 // ===============================
 // Dynamic Card Population
 // ===============================
+const destinationContainer = document.getElementById("destination-cards");
+const trailContainer = document.getElementById("trail-cards");
+
 function populateCards(destinations, containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
