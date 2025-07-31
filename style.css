@@ -10,7 +10,9 @@ html, body {
 
 /* Main container styling */
 body {
-  font-family: 'inter', sans-serif;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background-color: #f5f8fc;
   margin: 0;
   padding: 0;
@@ -105,7 +107,6 @@ body {
   max-height: 85vh;
   overflow-y: auto;
   z-index: 1000;
-  overflow: visible !important;
 }
 
 .pullup-container.open {
@@ -132,6 +133,8 @@ body {
 
 .pullup-content {
   padding: 0 16px 20px;
+  max-height: calc(70vh - 50px); /* header height subtracted */
+  overflow-y: auto;             /* allow scrolling */
 }
 
 .pullup-content h3 {
