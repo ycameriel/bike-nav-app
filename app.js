@@ -206,29 +206,21 @@ navigator.geolocation.getCurrentPosition(async position => {
         result.feature.geometry.coordinates[0][0]
       ];
 
-      // Intersection pulse circle
       const circle = L.circle(intersectionCoords, {
         color: '#1a1a1a', fillColor: '#1a1a1a',
         fillOpacity: 0.3, radius: 10
       }).addTo(map);
 
-      // Add intersection icon marker
       L.marker(intersectionCoords, { icon: intersectionIcon }).addTo(map);
 
       if (circleAnimationId) clearInterval(circleAnimationId);
       let growing = true;
       circleAnimationId = setInterval(() => {
         const currentRadius = circle.getRadius();
-        if (growing) {
-          circle.setRadius(currentRadius + 3);
-          if (currentRadius >= 25) growing = false;
-        } else {
-          circle.setRadius(currentRadius - 3);
-          if (currentRadius <= 10) growing = true;
-        }
+        circle.setRadius(growing ? currentRadius + 3 : currentRadius - 3);
+        growing = currentRadius >= 25 ? false : currentRadius <= 10 ? true : growing;
       }, 200);
 
-      // "You Tapped Here" pill label
       const tappedHereLabel = L.divIcon({
         html: `<div class="tapped-pill">You Tapped Here</div>`,
         className: '',
@@ -237,7 +229,6 @@ navigator.geolocation.getCurrentPosition(async position => {
       });
 
       L.marker(intersectionCoords, { icon: tappedHereLabel }).addTo(map);
-
     } else {
       intersectionCoords = [userLat, userLon];
     }
