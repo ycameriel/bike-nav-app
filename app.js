@@ -222,3 +222,11 @@ navigator.geolocation.getCurrentPosition(
     document.getElementById("location-name").textContent = "Unable to get location.";
   }
 );
+
+// Toggle Pull-up Container
+const pullupContainer = document.querySelector('.pullup-container');
+const pullupHeader = document.getElementById('pullup-header');
+
+pullupHeader.addEventListener('click', () => {
+  pullupContainer.classList.toggle('open');
+});
