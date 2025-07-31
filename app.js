@@ -213,13 +213,23 @@ navigator.geolocation.getCurrentPosition(async position => {
 
       L.marker(intersectionCoords, { icon: intersectionIcon }).addTo(map);
 
-      if (circleAnimationId) clearInterval(circleAnimationId);
-      let growing = true;
-      circleAnimationId = setInterval(() => {
-        const currentRadius = circle.getRadius();
-        circle.setRadius(growing ? currentRadius + 3 : currentRadius - 3);
-        growing = currentRadius >= 25 ? false : currentRadius <= 10 ? true : growing;
-      }, 200);
+    if (circleAnimationId) {
+      clearInterval(circleAnimationId);
+    }
+
+    let growing = true;
+    circleAnimationId = setInterval(() => {
+      if (!circle) return; // Ensure circle exists
+      const currentRadius = circle.getRadius();
+
+      if (growing) {
+        circle.setRadius(currentRadius + 3);
+        if (currentRadius + 3 >= 25) growing = false;
+      } else {
+        circle.setRadius(currentRadius - 3);
+        if (currentRadius - 3 <= 10) growing = true;
+      }
+    }, 200);
 
       const tappedHereLabel = L.divIcon({
         html: `<div class="tapped-pill">You Tapped Here</div>`,
