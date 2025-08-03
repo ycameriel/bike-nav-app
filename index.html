@@ -37,21 +37,20 @@
     <div class="attached-location-icon">
       <img src="Icons/location.svg" alt="Location icon"/>
     </div>
-
     <div class="pullup-content">
       <div class="location-toolbar">
         <p class="location-subtext">You have tapped in at</p>
         <h2 class="location-name" id="location-name">King Street & James Street</h2>
 
         <div class="button-group">
-          <button class="toolbar-button" id="explore-button">
-            <img src="Icons/explore.svg" alt="Explore icon" class="button-icon" />
+          <button class="toolbar-button" id="explore-button" style="background-color: #003366; color: white;">
+            <img src="Icons/explore.svg" alt="Explore icon" class="button-icon" style="filter: brightness(0) invert(1);" />
             Explore
           </button>
-          <button class="toolbar-button" id="navigate-button">
+          <button class="toolbar-button" onclick="location.href='search.html'">
             <img src="Icons/navigate.svg" alt="Navigate icon" class="button-icon" />
             Navigate
-          </button>
+         </button>
           <button class="toolbar-button" id="report-button">
             <img src="Icons/reportconcern.svg" alt="Report icon" class="button-icon" />
             Report a concern

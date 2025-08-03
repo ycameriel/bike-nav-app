@@ -18,6 +18,32 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImFhMWQ4NTJkNzZlMTRjMTc5MTA1ZGE5MDg2MWUzY2M1IiwiaCI6Im11cm11cjY0In0="; // paste your real key here
+
+
+// ===============================
+// OpenRouteService Function
+// ===============================
+async function getORSBikeDistance(lat1, lon1, lat2, lon2) {
+  const url = `https://api.openrouteservice.org/v2/directions/cycling-regular?api_key=${ORS_API_KEY}&start=${lon1},${lat1}&end=${lon2},${lat2}`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.features && data.features.length > 0) {
+      const summary = data.features[0].properties.summary;
+      return {
+        distance: summary.distance,
+        duration: summary.duration
+      };
+    } else {
+      throw new Error("No route found");
+    }
+  } catch (error) {
+    console.error("ORS fetch error:", error);
+    return null;
+  }
+}
+
 // ===============================
 // City Detection
 // ===============================
@@ -25,6 +51,7 @@ const cities = {
   toronto: { lat: 43.6532, lon: -79.3832, geojson: "datamaps/toronto.geojson" },
   markham: { lat: 43.8765, lon: -79.2741, geojson: "datamaps/markham.geojson" },
   mississauga: { lat: 43.5890, lon: -79.6441, geojson: "datamaps/mississauga.geojson" },
+  hamilton: { lat: 43.2557, lon: -79.8711, geojson: "datamaps/hamilton.geojson" }
 };
 
 function getClosestCity(userLat, userLon) {
@@ -60,10 +87,17 @@ function findNearestIntersection(userLat, userLon, features, maxDist = 500) {
 }
 
 async function reverseGeocode(lat, lon) {
-  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+  const apiKey = "2b8775771e474b159db2aae53fab1a74"; 
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${apiKey}`;
+
   const response = await fetch(url);
   const data = await response.json();
-  return data.display_name || "Unnamed Location";
+
+  if (data && data.results && data.results.length > 0) {
+    return data.results[0].formatted;
+  } else {
+    return "Unknown Location";
+  }
 }
 
 // ===============================
@@ -74,16 +108,25 @@ function populateCards(destinations, containerId) {
   container.innerHTML = "";
 
   destinations.forEach(dest => {
-    const card = document.createElement("div");
-    card.classList.add("destination-card");
-    card.innerHTML = `
+    const distanceKm = (dest.distance / 1000).toFixed(1);
+    const durationMin = Math.round(dest.distance / 150);
+
+    const wrapper = dest.link ? document.createElement("a") : document.createElement("div");
+
+    if (dest.link) {
+      wrapper.href = dest.link;
+    }
+
+    wrapper.classList.add("destination-card");
+    wrapper.innerHTML = `
       <img src="${dest.image}" alt="${dest.name}" />
       <div class="destination-info">
         <strong>${dest.name}</strong><br />
-        <span>${(dest.distance / 1000).toFixed(1)} km | ${Math.round(dest.distance / 200)} min</span>
+        <span style="font-size: 12px;">${distanceKm} km | ${durationMin} min by bike</span>
       </div>
     `;
-    container.appendChild(card);
+
+    container.appendChild(wrapper);
   });
 }
 
@@ -93,11 +136,13 @@ function updateNearestDestinations(userLat, userLon, allDestinations) {
     distance: haversineDistance(userLat, userLon, dest.lat, dest.lon)
   }));
 
-  const landmarks = destinationsWithDistance.filter(d => d.type === "landmark")
+  const landmarks = destinationsWithDistance
+    .filter(d => d.type === "landmark")
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 3);
 
-  const trails = destinationsWithDistance.filter(d => d.type !== "landmark")
+  const trails = destinationsWithDistance
+    .filter(d => d.type !== "landmark")
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 3);
 
@@ -157,6 +202,15 @@ const destinations = {
     { name: "Lakefront Promenade Park", lat: 43.5510, lon: -79.5580, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/7/75/Lakefront_Promenade_Park.jpg" },
     { name: "Jack Darling Memorial Park", lat: 43.5124, lon: -79.6190, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/5/50/Jack_Darling_Memorial_Park.jpg" },
     { name: "Rattray Marsh Conservation Area", lat: 43.5142, lon: -79.6207, type: "nature", image: "https://upload.wikimedia.org/wikipedia/commons/3/30/Rattray_Marsh_Conservation_Area.jpg" }
+  ],
+
+  hamilton: [
+    { name: "McMaster University", lat: 43.2639, lon: -79.9180, type: "landmark", image: "Images/McMaster University.jpg" },
+    { name: "Dundas Driving Park", lat: 43.2707, lon: -79.9616, type: "nature", image: "Images/Dundas Driving Park.jpg", link: "traildetail_example.html" },
+    { name: "Dundurn Castle", lat: 43.2680, lon: -79.8846, type: "landmark", image: "Images/Dundurn Castle.jpg" },
+    { name: "Bayfront Park", lat: 43.2705, lon: -79.8696, type: "nature", image: "Images/Bayfront Park.jpeg" },
+    { name: "Cootes Paradise", lat: 43.2800, lon: -79.9050, type: "nature", image: "Images/Cootes Paradise.jpg"},
+    { name: "Art Gallery of Hamilton", lat: 43.2562, lon: -79.8726, type: "landmark", image: "Images/Art Gallery of Hamilton.jpg" }
   ]
 };
 
@@ -188,8 +242,11 @@ let circleAnimationId = null;
 // Main Flow
 // ===============================
 navigator.geolocation.getCurrentPosition(async position => {
-  const userLat = position.coords.latitude;
-  const userLon = position.coords.longitude;
+  // location is currently hardcoded for testing, set to McMaster University
+  const userLat = 43.2609;
+  const userLon = -79.9192;
+  // const userLat = position.coords.latitude;
+  // const userLon = position.coords.longitude;
 
   const closestCity = getClosestCity(userLat, userLon);
   const geojsonUrl = cities[closestCity].geojson;
@@ -236,7 +293,7 @@ navigator.geolocation.getCurrentPosition(async position => {
       const newRadius = growing ? currentRadius + step : currentRadius - step;
 
       circle.setRadius(newRadius);
-
+      
       // Reverse direction when hitting limits
       if (newRadius >= maxRadius) { 
         growing = false;
@@ -278,9 +335,11 @@ navigator.geolocation.getCurrentPosition(async position => {
   document.getElementById("location-name").textContent = "Unable to get location.";
 });
 
+
 // Toggle Pull-up Container
 const pullupContainer = document.querySelector('.pullup-container');
 const pullupHeader = document.getElementById('pullup-header');
 pullupHeader.addEventListener('click', () => {
   pullupContainer.classList.toggle('open');
 });
+

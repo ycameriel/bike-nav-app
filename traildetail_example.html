@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoopedIn</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+  .location-toolbar h2 {
+    margin: 4px 0 8px;
+    font-size: 22px;
+  }
+
+  .location-toolbar p {
+    margin: 4px 0;
+    font-size: 14px;
+  }
+
+  .pullup-content h3 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 18px;
+  }
+
+  .pullup-content p {
+    margin: 4px 0;
+    font-size: 14px;
+  }
+
+ .button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0px 2px 2px; /* left and right margin added */
+}
+
+.toolbar-button {
+  flex: 1;
+  min-width: 0; /* allows shrink-to-fit within parent */
+  background-color: #ffffff;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  padding: 14px 14px;
+  padding-bottom: 8px; 
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: background-color 0.2s ease;
+}
+
+  .toolbar-button:hover {
+    background-color: #f3f3f3;
+    color: #333;
+  }
+
+  .route-title {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 0px;
+  }
+
+  .route-description {
+    font-size: 12px;
+    line-height: 1.3;
+    margin: 0;
+    color: #333;
+  }
+</style>
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="header-badge">
+      <img src="Icons/HamiltonBikeIconv2.png" alt="Bike logo" class="bike-logo" />
+      <p class="location-title">LoopedIn</p>
+    </div>
+  </header>
+  
+  <main class="app-main">
+    <div id="map" class="map-placeholder">Loading map...</div>
+  </main>
+  
+  <!-- Pull up container -->
+  <div class="pullup-container open">
+    <div class="pullup-header" id="pullup-header">
+      <div class="pullup-handle"></div>
+    </div>
+    
+    <!-- floating location icon -->
+    <div class="attached-location-icon">
+      <img src="Icons/location.svg" alt="Location icon"/>
+    </div>
+
+    <div class="pullup-content">
+        <div class="location-toolbar">
+        <h2 id="location-name" style="display: none;"></h2>
+
+      <div style="margin-bottom: 4px;">
+       <a href="index.html" style="
+       display: inline-flex;
+       align-items: center;
+       gap: 10px;
+       font-size: 16px;
+       color: #1a1a1a;
+       text-decoration: none;
+       padding: 4px 0;
+       ">
+       <span style="
+       display: inline-flex;
+       justify-content: center;
+       align-items: center;
+       width: 32px;
+       height: 32px;
+       background-color: #f0f0f0;
+       border-radius: 50%;
+       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+       ">
+       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#333">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+</span>
+Back to Explore
+</a>
+</div>
+      <div class="location-toolbar">
+        <h2 class="location-name">Dundas Driving Park</h2>
+        <div style="margin-bottom: 16px;"></div>
+        <img src="Images/Dundas Driving Park.jpg" alt="Cootes Paradise" style="width: 100%; border-radius: 16px; margin-bottom: 6px;">
+        <p>A scenic, tree-lined park with paved loops and shaded paths. It's perfect for a relaxing ride or family outing in Dundas.</p>
+      </div>
+
+      <h3>Select Routes</h3>
+     <div class="button-group">
+        <div class="toolbar-button">
+            <p class="route-title">Express</p>
+            <p class="route-description">
+                <span>Fastest route</span><br>
+                <span style="font-size: 12px; display: inline-block; margin-top: 6px;">🚴 3 Riders today</span>
+            </p>
+        </div>
+        <div class="toolbar-button">
+            <p class="route-title">Popular</p>
+            <p class="route-description">
+                <span>Most common</span><br>
+                <span style="font-size: 12px; display: inline-block; margin-top: 6px;">🚴 7 Riders today</span>
+            </p>
+        </div>
+        <div class="toolbar-button">
+            <p class="route-title">Relaxed</p>
+            <p class="route-description">
+                <span>Scenic</span><br>
+                 <span style="font-size: 12px; display: inline-block; margin-top: 6px;">🚴 17 Riders today</span>
+            </p>
+        </div>
+    </div>
+      <h3 style="margin-top: 28px;">Your Details</h3>
+      <p style="font-size: 14px;">📍 43.258°N, 79.873°W<br>🚲 No. 5680 A456</p>
+        <div style="margin-bottom: 24px;"></div>
+    </div>
+  </div> <!-- pullup-container -->
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"> </script>
+  
+  <script src="app.js"></script>
+</body>
+</html>
+
+
