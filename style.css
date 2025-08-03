@@ -22,6 +22,9 @@ body {
 ========================= */
 /* Floating header wrapper */
 .app-header {
+  background-color: #141414;
+  color: white;
+  text-align: center;
   display: flex;
   justify-content: center;
   position: fixed;
@@ -91,6 +94,7 @@ body {
   box-shadow: none;
 }
 
+/* Pull-up Drawer */
 .leaflet-label {
   font-family: 'Inter', sans-serif;
   font-size: 12px;
@@ -114,6 +118,7 @@ body {
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   box-shadow: 0 -1px 6px rgba(0,0,0,0.1);
+  transform: translateY(80%); /* initial collapsed */
   transition: transform 0.3s ease-in-out;
   transform: translateY(69%);
   z-index: 1000;
@@ -144,6 +149,7 @@ body {
 
 /* Scrollable content */
 .pullup-content {
+  padding: 0 16px 16px;
   flex: 1;
   overflow-y: auto;
   padding: 0 16px 20px;
@@ -188,11 +194,11 @@ body {
 .toolbar-button {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   background-color: #e6ecf3;
   border: none;
   border-radius: 20px;
-  padding: 6px 14px;
+  padding: 10px 16px;
   font-size: 0.9rem;
   color: #1a1a1a;
   cursor: pointer;
@@ -203,9 +209,14 @@ body {
   background-color: #d5d5d5;
 }
 
-.toolbar-button.active {
-  background-color: #1a1a1a;
+.toolbar-button:active {
+  background-color: #003366; /* dark blue */
   color: white;
+}
+
+.toolbar-button:active .button-icon,
+.toolbar-button.active .button-icon {
+  filter: brightness(0) invert(1); /* makes icon white */
 }
 
 .button-icon {
@@ -224,7 +235,7 @@ body {
 ========================= */
 .destination-cards {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   overflow-x: auto;
   padding-bottom: 16px;
 }
@@ -251,13 +262,13 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 10px;
+  padding: 7px 10px 10px 10px;
   background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
   color: #ffffff;
-  font-size: 16px;
+  font-size: 14px;
   letter-spacing: 1px;
-  line-height: 1.3;
+  line-height: 1.2;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
 }
@@ -352,4 +363,36 @@ body {
   border-width: 12px 8px 0 8px;
   border-style: solid;
   border-color: rgba(20, 20, 20, 0.8) transparent transparent transparent;
+}
+
+.pullup-container.open {
+  transform: translateY(5%);
+}
+
+
+.search-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.search-button {
+  flex: 1 1 calc(33.333% - 8px); /* 3 buttons per row */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 10px 12px;
+  background-color: #f5f5f9;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.search-button:hover {
+  background-color: #ececec;
+  transform: translateY(-2px);
 }

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoopedIn</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="header-badge">
+      <img src="Icons/HamiltonBikeIconv2.png" alt="Bike logo" class="bike-logo" />
+      <p class="location-title">LoopedIn</p>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div id="map" class="map-placeholder">Loading map...</div>
+  </main>
+
+  <!-- Pull up container -->
+  <div class="pullup-container open">
+    <div class="pullup-header" id="pullup-header">
+      <div class="pullup-handle"></div>
+    </div>
+
+    <!-- floating location icon -->
+    <div class="attached-location-icon">
+      <img src="Icons/location.svg" alt="Location icon"/>
+    </div>
+   
+    <div class="pullup-content">
+      <div class="location-toolbar">
+        <div class="location-toolbar">
+        <p class="location-subtext">You have tapped in at</p>
+        <h2 class="location-name" id="location-name">King Street & James Street</h2>
+        <div class="button-group">
+          <button class="toolbar-button" onclick="location.href='index.html'">
+            <img src="Icons/explore.svg" alt="Explore icon" class="button-icon" />
+            Explore
+          </button>
+          <button class="toolbar-button" onclick="location.href='index.html'" style="background-color: #003366; color: white;">
+            <img src="Icons/navigate.svg" alt="Navigate icon" class="button-icon" style="filter: brightness(0) invert(1);" />
+            Navigate
+          <button class="toolbar-button" id="report-button">
+            <img src="Icons/reportconcern.svg" alt="Report icon" class="button-icon" />
+            Report a concern
+          </button>
+        </div>
+      </div>
+      <img src="Images/find_destination.png" alt="Destination banner" style="width: 100%; border-radius: 12px; margin-bottom: 24px; margin-top: 16px;" />
+      <div style="display: flex; gap: 8px;">
+        <input type="text" placeholder="Art Gallery of Hamilton" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc;" />
+        <button style="padding: 8px 12px; border: none; border-radius: 8px; background-color: #333; color: #fff;">Go</button>
+      </div>
+      <div style="margin-bottom: 32px;"></div>
+      <h3 class="section-title">Destination Types</h3>
+      <div class="search-button-group">
+        <button class="search-button">🌳 Parks & Trails</button>
+        <button class="search-button">🏛️ Historical Landmarks</button>
+        <button class="search-button">🖼️ Galleries & Museums</button>
+        <button class="search-button">📚 Libraries</button>
+        <button class="search-button">🏥 Health Centers</button>
+        <button class="search-button">🏬 Shopping Centers</button>
+      </div>
+      <div style="margin-bottom: 32px;"></div>
+      <h3 class="section-title">Your Details</h3>
+      <p style="font-size: 14px;">📍 43.258°N, 79.873°W<br>🚲 No. 5680 A456</p>
+      </div>
+    <div style="margin-bottom: 24px;"></div>
+    </div>
+  </div> <!-- pullup-container -->
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
