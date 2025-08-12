@@ -51,6 +51,7 @@
           <button class="toolbar-button" onclick="location.href='index.html'" style="background-color: #003366; color: white;">
             <img src="Icons/navigate.svg" alt="Navigate icon" class="button-icon" style="filter: brightness(0) invert(1);" />
             Navigate
+          </button>
           <button class="toolbar-button" id="report-button">
             <img src="Icons/reportconcern.svg" alt="Report icon" class="button-icon" />
             Report a concern
@@ -59,8 +60,8 @@
       </div>
       <img src="Images/find_destination.png" alt="Destination banner" style="width: 100%; border-radius: 12px; margin-bottom: 24px; margin-top: 16px;" />
       <div style="display: flex; gap: 8px;">
-        <input type="text" placeholder="Art Gallery of Hamilton" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc;" />
-        <button style="padding: 8px 12px; border: none; border-radius: 8px; background-color: #333; color: #fff;">Go</button>
+        <input id="search-input" type="text" placeholder="Art Gallery of Hamilton" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc;" />
+        <button id="search-btn" style="padding: 8px 12px; border: none; border-radius: 8px; background-color: #333; color: #fff;">Go</button>
       </div>
       <div style="margin-bottom: 32px;"></div>
       <h3 class="section-title">Destination Types</h3>
@@ -84,3 +85,61 @@
   <script src="app.js"></script>
 </body>
 </html>
+
+<script>
+  (function() {
+    const SPECIAL_ROUTES = [
+      { patterns: ["dundas driving park", "dundas driving", "driving park dundas"], url: "traildetail_example.html" }
+      // You can add more special pages here later
+      // { patterns: ["some other place"], url: "somepage.html" }
+    ];
+
+    function normalize(s) {
+      return (s || "").toLowerCase().trim();
+    }
+
+    function handleSearch(query) {
+      const q = normalize(query);
+
+      // 1) Hard-coded redirects first
+      for (const item of SPECIAL_ROUTES) {
+        if (item.patterns.some(p => q.includes(p))) {
+          window.location.href = item.url;
+          return;
+        }
+      }
+
+      // 2) Fallback: you can hook your normal search behavior here
+      //    (e.g., filter destinations, pan the map, etc.)
+      // For now, just log it:
+      console.log("No special match. Normal search for:", q);
+    }
+
+    const input = document.getElementById("search-input");
+    const btn = document.getElementById("search-btn");
+
+    if (btn && input) {
+      btn.addEventListener("click", () => handleSearch(input.value));
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") handleSearch(input.value);
+      });
+    }
+
+    // Optional: make the “Destination Types” quick buttons feed into search
+    document.querySelectorAll(".search-button").forEach(b => {
+      b.addEventListener("click", () => handleSearch(b.textContent || ""));
+    });
+  })();
+</script>
+
+<script>
+  // Get saved location from main page
+  const savedLocation = localStorage.getItem("lastKnownLocation");
+
+  if (savedLocation) {
+    const locationElement = document.getElementById("location-name");
+    if (locationElement) {
+      locationElement.textContent = savedLocation;
+    }
+  }
+</script>
